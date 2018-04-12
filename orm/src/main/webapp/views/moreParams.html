@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>login</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+	<!-- JavaScript part -->
+	<script type="text/javascript" lang="JavaScript">
+	
+		/* 页面通用部分 */
+		
+	</script>	
+	<style type="text/css">
+		#login
+		{
+			width:400px;
+			height: 200px;
+			position:absolute; 
+			top: 50%;
+			left: 50%;
+			margin:-100px 0 0 -200px;
+			border:1px solid red; 
+			background-color: #097;
+		}
+		
+		#header
+		{
+			background-color: yellow;
+			margin-top: 20px;
+			margin-bottom: 20px;
+			/* 文本居中对齐 */
+			text-align: center;
+		}
+		
+		#username
+		{
+			margin-bottom: 20px;
+		}
+		
+		#password
+		{
+			margin-bottom: 20px;
+		}
+		
+		#loginBtn
+		{
+		
+		}								
+	</style>
+  </head>
+  
+  <body>
+	<form action="/spring-mvc/api/sys/moreParams" method="post">
+		<div id="login">
+			<div id="header">用户登录</div>
+			<div id="username">用户名 <input type="text" name="username" /></div>
+			<div id="password">密码 &nbsp;&nbsp;<input type="password" name="password" /></div>
+			<input type="hidden" name="currentPage" value="5" />
+			<input type="hidden" name="pageSize" value="30" />
+			<div id="loginBtn">
+				<div style="float:right; margin-right: 10px;"><input type="reset" value="重置" /></div>
+				<div style="float:right; margin-right: 10px;"><input type="submit" value="登录" /></div>
+			</div>
+		</div>	
+	
+	</form>
+
+
+	<script type="text/javascript" lang="javascript">
+	</script>
+  </<body>
+</html>

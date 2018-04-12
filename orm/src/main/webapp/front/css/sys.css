@@ -1,0 +1,30 @@
+@CHARSET "UTF-8";
+/* Cascading Style Sheet 层叠样式表 */
+
+
+/* 表格样式 */
+table{border-collapse:collapse;border-spacing:0;border-left:1px solid #888;border-top:1px solid #888;background:#efefef;}
+th,td{border-right:1px solid #888;border-bottom:1px solid #888;padding:5px 15px;}
+th{font-weight:bold;background:#ccc;}
+
+
+/* body 居中 */
+body {
+	border : solid blue 1px;
+	width : 1000px;
+	height : 1000px;
+	margin : 0 auto;
+}
+
+/* div 布局 */
+body,div {padding:0; }
+div {margin: 0;}
+div#container{width:1000px; height:1000px; float: left;display: inline;}
+div#header {background-color:#99bbbb;width:1000px;height:100px; position: relative;}
+div#menu {background-color:#ffff99;width:200px;height:800px;float:left;position: relative;display: inline;}
+div#content {background-color:#EEEEEE;width:800px;height:800px;float:left;position: relative;display: inline;}
+div#footer {background-color:#99bbbb;text-align:center;width:1000px;height:100px;float: left;display: inline;}
+
+
+
+

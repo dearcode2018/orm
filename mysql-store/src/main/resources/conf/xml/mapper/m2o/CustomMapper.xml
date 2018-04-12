@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hua.mapper.m2o.CustomMapper">
+	
+	<!-- 实体映射 -->
+	<resultMap type="custom" id="customResultMap">
+		<!-- 主键映射 -->
+		<id property="id" javaType="string" column="id" jdbcType="VARCHAR" />
+		<result property="name" javaType="string" column="name" jdbcType="VARCHAR" />
+		<result property="balance" javaType="double" column="balance" jdbcType="NUMERIC" />
+		<result property="address" javaType="string" column="address" jdbcType="VARCHAR" />
+		<!-- 集合嵌套查询select的方式 -->
+		<collection property="items" ofType="item" javaType="arrayList" column="id" select="listItem"></collection>
+		<!-- 集合嵌套结果result方式 -->
+		<collection property="items" ofType="item" javaType="arrayList" column="id" resultMap="itemResultMap"></collection>
+	</resultMap>
+
+	<!--  -->
+	<resultMap type="item" id="itemResultMap">
+		<!-- 主键映射 -->
+		<id property="id" javaType="string" column="id" jdbcType="VARCHAR" />
+		<result property="name" javaType="string" column="name" jdbcType="VARCHAR" />
+		<result property="monetary" javaType="double" column="" jdbcType="NUMERIC" />
+		<result property="remark" javaType="string" column="" jdbcType="VARCHAR" />
+		<collection property="" ></collection>
+	</resultMap>	
+
+	<!-- 插入单个对象 -->
+	<insert id="insert" parameterType="custom">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT seq_custom_oid.nextVal FROM dual
+		</selectKey>
+		INSERT INTO custom () 
+		VALUES (#{, jdbcType=VARCHAR}, #{, jdbcType=VARCHAR}, #{, jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 删除单个对象 -->
+	<delete id="delete" parameterType="string">
+		<![CDATA[
+			DELETE FROM custom a WHERE a.id = #{id}
+			]]>
+	</delete>
+	
+	<!-- 更新单个对象(全量) -->
+	<update id="update" parameterType="custom">
+		UPDATE custom a 
+		<set>
+			<if test="null !=  and '' != "> ,a. = #{, jdbcType=VARCHAR}, </if>
+			<if test="null !=  and '' != "> ,a. = #{, jdbcType=VARCHAR}, </if>
+			<if test="null !=  and '' != "> ,a. = #{, jdbcType=VARCHAR} </if>
+		</set>
+		WHERE a.id = #{id}
+	</update>
+
+	<!-- 获取单个对象  -->
+	<select id="get"  parameterType="string" resultMap="customResultMap">
+		<![CDATA[
+			SELECT a.* FROM custom a 
+			WHERE a.id = #{id}
+			]]>
+	</select>
+	
+	<!-- 
+		注意，在Oracle中 concat("%", #{name}, "%") 方式是不支持的，
+		应该修改为用 ||，而mysql却是支持这种方式.
+	 -->
+	<!-- sql复用 -->
+	<sql id="searchCondition">
+		<if test="null != entity">
+			<if test="null != entity. and '' != entity."> AND a. LIKE ('%' || #{entity.} || '%')</if>
+			<if test="null != entity. and '' != entity."> AND a. = #{entity.}</if>
+			<if test="null != entity. and '' != entity."> AND a. = #{entity.}</if>		
+		</if>
+	</sql>
+
+	<!-- 搜索符合条件的对象  -->
+	<select id="search" parameterType="pagerEntity" resultMap="customResultMap">
+		SELECT t.* FROM 
+		(SELECT a.*, rowNum rNum FROM custom a 
+		WHERE rowNum <![CDATA[ <= ]]> #{endIndex}
+	 	<include refid="searchCondition"/>
+		) t 
+		WHERE t.rNum <![CDATA[ >= ]]> #{startIndex}
+	</select>
+	
+	<!-- 符合搜索条件的对象个数 -->
+	<select id="searchDataSize" parameterType="pagerEntity" resultType="string">
+		SELECT COUNT(*) FROM custom a WHERE 1 = 1
+		<include refid="searchCondition"/>
+	</select>
+	
+	<!--  统计 -->
+	<select id="count" resultType="string">
+		SELECT COUNT(*) FROM custom a
+		WHERE a.id = #{id}
+	</select>	
+	
+	<!--  多余的 -->
+	<select id="listItem" parameterType="string" resultType="item">
+		SELECT a.* FROM item a
+		WHERE a.customId = #{customId}
+	</select>	
+	
+	<!--  多余的 -->
+	<select id="duoyu" resultType="string">
+		<![CDATA[
+			]]>
+	</select>
+	
+</mapper>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hua.mapper.o2o.PersonMapper">
+	
+	<!-- 实体映射 -->
+	<resultMap type="person" id="personResultMap">
+		<!-- 主键映射 -->
+		<id property="id" javaType="string" column="id" jdbcType="VARCHAR" />
+		<result property="name" javaType="string" column="name" jdbcType="VARCHAR" />
+		<result property="photoUrl" javaType="string" column="photoUrl" jdbcType="VARCHAR" />
+		<result property="gender" javaType="string" column="gender" jdbcType="VARCHAR" />
+		<result property="nation" javaType="string" column="nation" jdbcType="VARCHAR" />
+		<result property="birthday" javaType="date" column="birthday" jdbcType="DATE" />
+		<result property="address" javaType="string" column="address" jdbcType="VARCHAR" />
+		<!-- 信息映射 -->
+		<result property="beforeCount" javaType="string" column="beforeCount" jdbcType="NUMERIC" />
+		<result property="afterCount" javaType="string" column="afterCount" jdbcType="NUMERIC" />
+	</resultMap>
+
+	<!-- 插入单个对象 -->
+	<insert id="insert" parameterType="person">
+		INSERT INTO person (name, photoUrl, gender, nation, birthday, address) 
+		VALUES (#{name, jdbcType=VARCHAR}, 
+		#{photoUrl, jdbcType=VARCHAR}, #{gender, jdbcType=VARCHAR}, 
+		#{nation, jdbcType=VARCHAR}, #{birthday, jdbcType=DATE}, 
+		#{address, jdbcType=VARCHAR})
+	</insert>
+
+	<!-- 删除单个对象 -->
+	<delete id="delete" parameterType="string">
+		DELETE FROM person
+		WHERE id = #{id}
+	</delete>
+	
+	<!-- 更新单个对象(全量) -->
+	<update id="update" parameterType="person">
+		UPDATE person a
+		<!-- set中一个条件都不满足，即set中包含的内容为空的时候就会报错 -->
+		<set>
+			<if test="null != name and '' != name"> a.name = #{name, jdbcType=VARCHAR}, </if>
+			<if test="null != photoUrl and '' != photoUrl"> a.photoUrl = #{photoUrl, jdbcType=VARCHAR}, </if>
+			<if test="null != gender and '' != gender"> a.gender = #{gender, jdbcType=VARCHAR}, </if>
+			<if test="null != nation and '' != nation"> a.nation = #{nation, jdbcType=VARCHAR}, </if>
+			<if test="null != birthday"> a.birthday = #{birthday, jdbcType=DATE}, </if>
+			<if test="null != address and '' != address"> a.address = #{address, jdbcType=VARCHAR} </if>
+		</set>
+		WHERE a.id = #{id}
+	</update>
+
+	<!-- dmlInsertSelectKey (实际并不支持多个selectKey的方式) -->
+	<insert id="dmlInsertSelectKey" parameterType="person">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT seq_person_oid.nextVal FROM dual
+		</selectKey>
+		<!-- 执行插入前，先查询记录条数 -->
+<!-- 		<selectKey keyProperty="beforeCount" order="BEFORE" resultType="string">
+			SELECT count(*) beforeCount FROM person
+		</selectKey>-->	
+		<!-- 执行插入后，查询记录条数 -->
+<!-- 		<selectKey keyProperty="afterCount" order="AFTER" resultType="string">
+			SELECT count(*) afterCount FROM person
+		</selectKey> -->	
+		
+		INSERT INTO person (id, name, photoUrl, gender, nation, birthday, address) 
+		VALUES (#{id, jdbcType=VARCHAR}, #{name, jdbcType=VARCHAR}, 
+		#{photoUrl, jdbcType=VARCHAR}, #{gender, jdbcType=VARCHAR}, 
+		#{nation, jdbcType=VARCHAR}, #{birthday, jdbcType=DATE}, 
+		#{address, jdbcType=VARCHAR})		
+	</insert>
+
+	<!-- 获取单个对象  -->
+	<select id="get"  parameterType="string" resultMap="personResultMap">
+		<![CDATA[
+			SELECT a.* FROM person a 
+			WHERE a.id = #{id}
+			]]>
+	</select>
+
+	<!-- sql复用 -->
+	<sql id="searchCondition">
+		<if test="null != entity">
+			<if test="null != entity.name and '' != entity.name"> AND a.name LIKE ('%' ||  #{entity.name} || '%') </if>
+			<if test="null != entity.gender and '' != entity.gender"> AND a.gender = #{entity.gender} </if>
+			<if test="null != entity.nation and '' != entity.nation"> AND a.nation LIKE ('%' || #{entity.nation} || '%') </if>
+			<if test="null != entity.startBirthday"> AND a.birthday <![CDATA[ >= ]]> #{entity.startBirthday, jdbcType=DATE} </if>
+			<if test="null != entity.endBirthday"> AND a.birthday <![CDATA[ <= ]]> #{entity.endBirthday, jdbcType=DATE} </if>
+			<if test="null != entity.address and '' != entity.address"> AND a.address LIKE ('%' ||  #{entity.address} || '%') </if>
+		</if>
+	</sql>
+
+	<!-- 搜索符合条件的对象  -->
+	<select id="search" parameterType="pagerEntity" resultMap="personResultMap">
+		SELECT t.* FROM 
+		(SELECT a.*, rowNum rNum FROM person a 
+		WHERE rowNum <![CDATA[ <= ]]> #{endIndex}
+	 	<include refid="searchCondition"/>
+		) t 
+		WHERE t.rNum <![CDATA[ >= ]]> #{startIndex}
+	</select>
+	
+	<!-- 符合搜索条件的对象个数 -->
+	<select id="searchDataSize" parameterType="pagerEntity" resultType="string">
+		SELECT COUNT(*) FROM person a WHERE 1 = 1
+		<include refid="searchCondition"/>
+	</select>
+	
+	<!--  统计 -->
+	<select id="count" resultType="string">
+		SELECT COUNT(*) FROM person a
+		WHERE a.id = #{id}
+	</select>	
+	
+	<!-- array foreach (collection = array) -->
+	<select id="arrayForeach" resultType="string">
+		SELECT count(*) FROM person a
+		WHERE a.id IN
+		<foreach collection="array" open="(" item="item" index="index" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+		
+	<!-- list foreach (collection = list) -->
+	<select id="listForeach" resultType="string">
+		SELECT count(*) FROM person a
+		WHERE a.id IN
+		<foreach collection="list" open="(" item="item" index="index" separator="," close=")">
+			#{item}
+		</foreach>	
+	</select>
+	
+	<!-- list foreach (collection = list) -->
+	<select id="setForeach" resultType="string">
+		SELECT count(*) FROM person a
+		WHERE a.id IN
+		<foreach collection="list" open="(" item="item" index="index" separator="," close=")">
+			#{item}
+		</foreach>	
+	</select>		
+		
+	<!-- map foreach (collection = paramKeyName) -->
+	<select id="mapForeachParamKeyName" resultType="string">
+		SELECT count(*) FROM person a
+		WHERE a.id IN
+		<foreach collection="oidMap" open="(" index="key" item="value"
+		 separator="," close=")">
+			#{value}
+		</foreach>		
+	</select>
+
+	<!-- map foreach (collection = keyName) -->
+	<select id="mapForeachMapKeyName" resultType="string">
+		SELECT count(*) FROM person a
+		WHERE a.id IN
+		<foreach collection="ids" open="(" index="index" item="item" 
+		separator="," close=")">
+			#{item}
+		</foreach>		
+	</select>		
+		
+	<!-- 通过map实现动态列查询功能
+		$的参数直接输出，#的参数会被替换为?，然后传入参数值执行。 
+	 -->
+	<select id="dynamicColumnQuery" resultMap="personResultMap">
+		SELECT a.* FROM person a
+		WHERE
+		<foreach collection="columnMap" open="" index="column" 
+		item="value" separator="AND" close="">
+			${column} = #{value}
+		</foreach>		
+	</select>			
+		
+	<!-- choose 动态sql语句 -->		
+	<select id="dynamicChoose" resultMap="personResultMap">
+		SELECT a.* FROM person a
+		WHERE 1 = 1
+		<!-- 相当于 switch 语句 -->
+		<choose>
+			<when test="null != name and '' != name">
+				AND a.name LIKE ( '%' || #{name} || '%')
+			</when>
+			<when test="null != gender and '' != gender">
+				AND a.gender = #{gender}
+			</when>
+			<when test="null != nation and '' != nation">
+				AND a.nation = #{nation}
+			</when>
+			<!-- 当上面所有条件都不满足时匹配 -->
+			<otherwise>
+				AND a.gender IN ('Male', 'Female')
+			</otherwise>
+		</choose>	
+	</select>	
+	
+	<!-- where 动态sql语句 -->		
+	<select id="dynamicWhere"  resultMap="personResultMap">
+		SELECT a.* FROM person a
+		<where>
+			<if test="null != name and '' != name">
+				a.name LIKE ( '%' || #{name} || '%')
+			</if>		
+			<if test="null != gender and '' != gender">
+				AND a.gender = #{gender}
+			</if>
+			<if test="null != nation and '' != nation">
+				AND a.nation = #{nation}
+			</if>							
+		</where>
+	</select>
+	
+	<!-- trim 动态sql语句 -->		
+	<select id="dynamicTrim"  resultMap="personResultMap">
+		SELECT a.* FROM person a
+		<trim prefix="WHERE" prefixOverrides="AND | OR">
+			<if test="null != name and '' != name">
+				a.name LIKE ( '%' || #{name} || '%')
+			</if>		
+			<if test="null != gender and '' != gender">
+				AND a.gender = #{gender}
+			</if>
+			<if test="null != nation and '' != nation">
+				AND a.nation = #{nation}
+			</if>							
+		</trim>
+	</select>	
+	
+	<!--  多余的 -->
+	<select id="duoyu" resultType="string">
+		<![CDATA[
+			]]>
+	</select>
+	
+</mapper>

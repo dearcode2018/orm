@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Ajax.html</title>
+	
+    <meta name="keywords" content="keyword1,keyword2,keyword3">
+    <meta name="description" content="this is my page">
+    <meta name="content-type" content="text/html; charset=UTF-8">
+    
+    <!-- Cascading Style Sheet -->
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <link rel="stylesheet" type="text/css" href="../css/sys.css">
+    <!-- 供应商样式 -->
+    <!-- <!-- <link rel="stylesheet" type="text/css" href="../css/vendor/xx.css">    -->
+	<!-- 供应商Js库 -->
+	<script src="jquery-2.1.0.js"></script>   
+	<!-- JavaScript part -->
+	<script type="text/javascript" lang="JavaScript">
+		/* 页面通用部分 */
+		
+	</script>	
+  </head>
+  
+  <body>
+  
+  <form id="infoFormId" action="/PersonInfoServlet" method="post" enctype="application/x-www-form-urlencoded">
+  	<!-- 隐藏字段 -->
+  	<input type="hidden" id="" name="oid" value="20094578" />
+  	<table>
+  		<tr><td>用户名 : </td><td><input type="text" id="username" name="username" value="" /></td><td>提示信息</td></tr>
+  		<tr><td>密码 : </td><td><input type="password" id="password" name="password" value="" /></td><td>提示信息</td></tr>
+  		<tr><td>性别</td><td><input type="radio" id="" value="1" name="sex" checked="checked" /> 男
+  		&nbsp; &nbsp;<input type="radio" id=""  value="0"  name="sex" /> 女
+  		</td><td>提示信息</td></tr>
+  		<tr><td>兴趣爱好 : </td>
+  			<td>
+  				<input type="checkbox" id="" name="interestArray" value="sport" /> 运动
+  				&nbsp; &nbsp;<input type="checkbox" id="" name="interestArray" value="read" /> 阅读
+  				&nbsp; &nbsp;<input type="checkbox" id="" name="interestArray" value="makeFriend" checked="checked" /> 交友
+  			</td><td>提示信息</td></tr>
+  		<tr><td>所在城市 : </td><td>
+	  		<select id="" name="">
+	  			<optgroup label="广州市">
+	  				<option name="" value="tianhe">天河区</option>
+	  				<option name="" value="yuexiu">越秀区</option>
+	  				<option name="" value="huangpu">黄埔区</option>
+	  			</optgroup>
+	  			<optgroup label="深证市">
+	  				<option name="" value="futian">福田区</option>
+	  				<option name="" value="luohu" selected="selected">罗湖区</option>
+	  				<option name="" value="longgang">龙岗区</option>
+	  			</optgroup>	  			
+	  		</select></td><td>提示信息</td></tr>
+  		<tr><td>详细信息 : </td><td><textarea rows="10" cols="50" name="info" id=""></textarea></td><td>提示信息</td></tr>
+  		
+  		<tr><td>信息搜索 : </td><td><input type="search" id="" name="searchValue" value="" /></td><td>提示信息</td></tr>
+  		<tr><td><input type="reset" id="" name="" value="重置" /></td><td>提示信息</td></tr>
+  	</table>
+  </form>
+  
+  <fieldset title="操作面板">
+    <input type="button" id="" name="" value="Ajax提交" onclick="ajaxSubmit();" />
+  	请求提示 : <input type="text" id="requestTip" name="" size="30" readonly="readonly" />
+  	请求完成 : <input type="text" id="completeResult" name="" size="30" readonly="readonly" />
+  	请求错误 : <input type="text" id="errorResult" name="" size="30" readonly="readonly" />
+  	<br />
+  	响应数据 : 
+  	<br />
+  	<textarea title="响应数据" rows="20" cols="80" id="showResult" readonly="readonly"></textarea>
+  </fieldset>
+  
+  	<script type="text/javascript" lang="javascript">
+  		/* 页面共用部分 */
+  		// 页面加载执行
+  		$(function() {
+  			
+  		});
+  		
+	</script>
+  
+  
+  
+	<script type="text/javascript" lang="javascript">
+		/* 表单处理部分 */
+	
+		// 提交请求
+		function ajaxSubmit() {
+			var url = APP_ROOT + "/PersonInfoServlet";
+			var data = $("#infoFormId").serializeJson();
+			var resultObj = $("#showResult");
+			console.log(data);
+			//return;
+			// ajax 请求
+			$.ajax({
+				// 是否缓存页面
+				cache : false,
+				type : "POST",
+				url : url ,
+				// 表单数据 序列化
+			 	data :data,
+			 	dataType : "json",
+			 	contentType: "application/json; charset=utf8",
+			 	/* 发送请求前 - 调用 */
+			 	beforeSend : function(xhr) {
+			 		$("#requestTip").val("正在处理，请稍等...");
+			 	},
+			 	/* 请求完成 (请求成功或失败均调用) */
+			 	complete : function(xhr, textStatus) {
+			 		$("#completeResult").val(textStatus);
+			 		$("#requestTip").val("已经完成处理!");
+			 	},
+			 	/* 请求处理失败 */
+			 	error : function(xhr, textStatus, errorThrown) {
+			 		$("#errorResult").val(textStatus + ": " + errorThrown);
+			 		//resultObj.html(textStatus + ": " + "服务器处理失败");
+			 		// error: 服务器处理失败Internal Server Error
+			 		//resultObj.html(textStatus + ": " + "服务器处理失败" + errorThrown);
+			 	},
+			 	success : function(data, textStatus, xhr) {
+			 		// 返回 data 是一个 js 对象
+			 		// 将 js 对象转成 json 格式字符串
+			 		var resultJson = JSON.stringify(data);
+			 		resultObj.html(resultJson);
+			 		// 清空请求错误结果显示
+			 		$("#errorResult").val("");
+			 	},
+			});
+		}
+	
+		// 文件上传
+		function fileUpload() {
+			  var filepath=$("input[name='uploadFile']").val(); 
+	       	  // .下标
+	          var extStart=filepath.lastIndexOf("."); 
+	       	  // 获取文件后缀名，统一转小写
+	          var ext=filepath.substring(extStart,filepath.length).toLowerCase(); 
+	          if(ext!=".xls"&&ext!=".xlsx") {
+	        	  // 弹出提示，弹出框样式需要修饰
+	        	  	//alert("请选择xls或xlsx格式的文件"); 
+	          		options = {
+	                   _type: 'MsgDialog', 
+	                   _countdown:true,
+	                   _msg: "请选择xls或xlsx格式的文件",
+	                   _msgicon: "error",
+	                   _callbackfn: function () {
+	                		// 清空输入框
+	               		$("#fileUrl").val('');
+	                   }
+	               	};
+	               _Dialog(options);
+	         	 return false;
+	          }
+		}
+		
+	</script>
+	
+
+
+
+	<script type="text/javascript" lang="javascript">
+	</script>
+  </<body>
+</html>

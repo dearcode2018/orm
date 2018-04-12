@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	http://www.springframework.org/schema/context	http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	" default-lazy-init="true">
+
+
+	
+	<!-- 启用注解 -->
+	<!-- <context:component-scan base-package="com.hua" /> -->
+	
+<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+   <property name="driverClass" value="${db.jdbc.c3p0.driverClass}"/>
+   <property name="jdbcUrl" value="${db.jdbc.c3p0.jdbcUrl}"/>
+   <property name="user" value="${db.jdbc.c3p0.user}"/>
+   <property name="password" value="${db.jdbc.c3p0.password}"/>
+   <property name="maxPoolSize" value="${db.jdbc.c3p0.maxPoolSize}"/>
+   <property name="minPoolSize" value="${db.jdbc.c3p0.minPoolSize}"/>
+   <property name="initialPoolSize" value="${db.jdbc.c3p0.initialPoolSize}"/>
+   <property name="acquireIncrement" value="${db.jdbc.c3p0.acquireIncrement}"/>
+   <property name="checkoutTimeout" value="${db.jdbc.c3p0.checkoutTimeout}"/>
+   <property name="maxIdleTime" value="${db.jdbc.c3p0.maxIdleTime}"/>
+   <property name="idleConnectionTestPeriod" value="${db.jdbc.c3p0.idleConnectionTestPeriod}"/>
+   <property name="acquireRetryAttempts" value="${db.jdbc.c3p0.acquireRetryAttempts}"/>
+   <property name="breakAfterAcquireFailure" value="${db.jdbc.c3p0.breakAfterAcquireFailure}"/>
+   <property name="testConnectionOnCheckout" value="${db.jdbc.c3p0.testConnectionOnCheckout}"/>                 
+</bean> 
+
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"> 
+   <property name="dataSource" ref="dataSource"/>  
+   <property name="typeAliasesPackage" value="com.xyt.cgqm.entity" /> 
+   <!-- mapper和resultmap配置路径 -->   
+   <property name="mapperLocations">  
+        <list>
+         	<value>classpath:/xml/mapper/**/*Mapper.xml</value>
+         </list>       
+   </property>
+</bean>
+ 
+<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">  
+   <property name="basePackage" value="com.xyt.cgqm.mapper"/>   
+   <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+</bean>	
+
+</beans>

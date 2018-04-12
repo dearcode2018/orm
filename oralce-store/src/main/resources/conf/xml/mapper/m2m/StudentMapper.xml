@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.3//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.hua.mapper.orm.StudentMapper">
+	
+	<!-- 实体映射 -->
+	<resultMap type="Student" id="studentResultMap">
+		<!-- 主键映射 -->
+		<id property="id" javaType="string" column="id" jdbcType="VARCHAR" />
+		<result property="name" javaType="string" column="name" jdbcType="VARCHAR" />
+		<result property="credit" javaType="Double" column="credit" jdbcType="NUMERIC" />
+		<result property="birthday" javaType="date" column="birthday" jdbcType="DATE" />
+		<result property="address" javaType="string" column="address" jdbcType="VARCHAR" />
+		<collection property="" ></collection>
+	</resultMap>
+
+	<!-- 插入单个对象 -->
+	<insert id="insert" parameterType="Student">
+		<selectKey keyProperty="id" order="BEFORE" resultType="string">
+			SELECT seq_student_oid.nextVal FROM dual
+		</selectKey>
+		<![CDATA[
+			INSERT INTO student (id, name, credit, birthday, address) 
+			VALUES (#{id, jdbcType=VARCHAR}, #{name, jdbcType=VARCHAR}, #{credit, jdbcType=NUMERIC}, 
+			#{birthday, jdbcType=DATE}, #{address, jdbcType=VARCHAR})
+			]]>
+	</insert>
+
+	<!-- 删除单个对象 -->
+	<delete id="delete" parameterType="string">
+		<![CDATA[
+			DELETE FROM student a WHERE a.id = #{id}
+			]]>
+	</delete>
+	
+	<!-- 更新单个对象(全量) -->
+	<update id="update" parameterType="Student">
+		UPDATE student a SET a.name = #{name}, 
+		<if test="null != credit"> a.credit = #{credit}, </if>
+		a.birthday = #{birthday}, a.address = #{address}
+		WHERE a.id = #{id}
+	</update>
+
+	<!-- 获取单个对象  -->
+	<select id="get" resultMap="studentResultMap" parameterType="string">
+		<![CDATA[
+			SELECT a.* FROM student a WHERE a.id = #{id}
+			]]>
+	</select>
+
+	<!-- sql复用 -->
+	<sql id="searchWhere">
+		<if test="null != entity">
+			<if test="null != entity.name"> AND a.name LIKE '%' || #{entity.name} || '%' </if>
+			<if test="null != entity.startBirthday"> AND a.birthday <![CDATA[ >= ]]> #{entity.startBirthday} </if>
+			<if test="null != entity.endBirthday"> AND a.birthday <![CDATA[ <= ]]> #{entity.endBirthday} </if>
+			<if test="null != entity.address"> AND a.address LIKE '%' || #{entity.address} || '%' </if>
+		</if>
+	</sql>
+
+	<!-- 搜索符合条件的对象  -->
+	<select id="search" resultMap="studentResultMap" parameterType="pagerEntity">
+		SELECT t.* FROM 
+		(SELECT a.*, rowNum rNum FROM student a WHERE rowNum <![CDATA[ <= #{endIndex} ]]>
+	 	<include refid="searchWhere"/>
+		) t 
+		WHERE t.rNum <![CDATA[ >= #{startIndex} ]]>
+	</select>
+	
+	<!-- 符合搜索条件的对象个数 -->
+	<select id="searchDataSize" resultType="string" parameterType="pagerEntity">
+		SELECT COUNT(*) FROM student a WHERE 1 = 1
+		<include refid="searchWhere"/>
+	</select>
+		
+	<!--  获取所有对象 -->
+	<select id="listAll" resultMap="studentResultMap">
+		<![CDATA[
+			SELECT a.* FROM student a
+			]]>
+	</select>
+	
+	<!--  获取最大的Id -->
+	<select id="getMaxId" resultType="string">
+		<![CDATA[
+			SELECT max(a.id) FROM student a
+			]]>
+	</select>
+	
+	<!--  多余的 -->
+	<select id="duoyu" resultType="string">
+		<![CDATA[
+			]]>
+	</select>
+	
+</mapper>
